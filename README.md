@@ -160,7 +160,7 @@ npm install
 # 3. Launch local development server
 npm run dev
 ```
-Open the provided URL (typically `http://localhost:5173`) in your browser.
+Open the provided URL (typically `http://localhost:8080/`) in your browser.
 
 ### Option 3: Using Python Built-in HTTP Server
 ```bash
