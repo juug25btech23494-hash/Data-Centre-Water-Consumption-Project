@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Interactive Data Centre Water Consumption, Cooling and Conservation Simulation</title>
+  
+  <!-- Modern Engineering Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- KaTeX for rendered academic LaTeX mathematics -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Three.js ES Module Import Map for zero-build direct browser execution -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ==================== MAIN APPLICATION CONTAINER ==================== -->
+  <div id="app-container">
+
+    <!-- 1. TOP NAVIGATION HEADER BAR -->
+    <header class="header-bar">
+      <div class="brand-section">
+        <div class="brand-icon">💧</div>
+        <div class="brand-title">
+          <h1>
+            3D Data Centre Water & Cooling Simulation
+            <span class="badge">Research Simulator</span>
+          </h1>
+          <span class="brand-subtitle">
+            Based on: <em>"Why Data Centres Consume So Much Water and How Water Consumption Can Be Reduced"</em> (Mytton 2021, Bora Ristic 2015, ITU-T L.55)
+          </span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btn-faculty-tour" class="header-btn primary" title="Launch Automated Faculty Presentation Walkthrough">
+          <span>🎓</span> Guided Faculty Tour
+        </button>
+
+        <div style="display:flex; align-items:center; gap:12px; margin: 0 8px;">
+          <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted); cursor:pointer;">
+            <input type="checkbox" id="toggle-roof" checked> Roof
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted); cursor:pointer;">
+            <input type="checkbox" id="toggle-wireframe"> Wireframe
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted); cursor:pointer;">
+            <input type="checkbox" id="toggle-heatmap"> Heat Map
+          </label>
+        </div>
+
+        <button id="btn-reset-view" class="header-btn" title="Reset Camera View to Default Isometric">
+          <span>🔄</span> Reset View
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. LEFT CONTROL PANEL -->
+    <aside class="left-panel">
+      <div class="panel-header">
+        <span class="panel-title"><span>⚙️</span> Cooling Architecture</span>
+      </div>
+
+      <div class="panel-content">
+        <!-- Section: Cooling Technology Switcher -->
+        <div class="section-group">
+          <span class="section-title"><span>❄️</span> Select Cooling Technology</span>
+          <div class="tech-card-group">
+            <div class="tech-card active" data-tech-id="evaporative">
+              <div class="tech-card-header">
+                <strong>Water-Based Evaporative</strong>
+                <span class="badge" style="background:var(--accent-cyan-dim); color:var(--accent-cyan); font-size:10px;">High Water</span>
+              </div>
+              <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">
+                Cooling Tower + Chiller + CRAH Units. Baseline 25.5M L/yr (David Mytton 2021).
+              </p>
+            </div>
+
+            <div class="tech-card" data-tech-id="air_cooled">
+              <div class="tech-card-header">
+                <strong>Air-Based Dry Cooling</strong>
+                <span class="badge" style="background:var(--accent-amber-dim); color:var(--accent-amber); font-size:10px;">Zero Site Water</span>
+              </div>
+              <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">
+                Finned Dry Coolers + DX Compressors. Eliminates on-site water, higher electrical PUE.
+              </p>
+            </div>
+
+            <div class="tech-card" data-tech-id="liquid_immersion">
+              <div class="tech-card-header">
+                <strong>Liquid Immersion Cooling</strong>
+                <span class="badge" style="background:var(--accent-emerald-dim); color:var(--accent-emerald); font-size:10px;">Next-Gen AI</span>
+              </div>
+              <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">
+                Dielectric Fluid Tanks + CDU Warm Water Loop. 96% direct capture, ultra-low WUE 0.02.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Camera Viewpoints -->
+        <div class="section-group">
+          <span class="section-title"><span>🎥</span> Camera Waypoints</span>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+            <button class="chip-btn active" data-camera-preset="isometric">📐 Isometric</button>
+            <button class="chip-btn" data-camera-preset="server_room">🖥️ Server Hall</button>
+            <button class="chip-btn" data-camera-preset="hot_aisle">🔥 Hot/Cold Aisle</button>
+            <button class="chip-btn" data-camera-preset="mechanical_room">⚙️ Plant Room</button>
+            <button class="chip-btn" data-camera-preset="cooling_tower">💨 Cooling Tower</button>
+            <button class="chip-btn" data-camera-preset="storage_tank">🛢️ Water Tank</button>
+          </div>
+        </div>
+
+        <!-- Section: Clickable 3D Components Quick-List -->
+        <div class="section-group">
+          <span class="section-title"><span>🔍</span> Component Inspector</span>
+          <div style="display:flex; flex-wrap:wrap; gap:5px;">
+            <button class="chip-btn" data-inspect-key="server_rack">🖥️ Racks (45U)</button>
+            <button class="chip-btn" data-inspect-key="crah_unit">❄️ CRAH Units</button>
+            <button class="chip-btn" data-inspect-key="chiller">⚙️ Chiller</button>
+            <button class="chip-btn" data-inspect-key="heat_exchanger">🔄 Heat Exchanger</button>
+            <button class="chip-btn" data-inspect-key="cooling_tower">💨 Cooling Tower</button>
+            <button class="chip-btn" data-inspect-key="circulation_pump">🌀 VFD Pumps</button>
+            <button class="chip-btn" data-inspect-key="water_tank">🛢️ 150m³ Tank</button>
+            <button class="chip-btn" data-inspect-key="water_treatment">🧪 RO Skid</button>
+            <button class="chip-btn" data-inspect-key="dry_cooler">🌀 Dry Cooler</button>
+            <button class="chip-btn" data-inspect-key="immersion_tank">🌊 Immersion Tank</button>
+          </div>
+        </div>
+
+        <!-- Section: Hydronic Piping Legend -->
+        <div class="section-group">
+          <span class="section-title"><span>🚰</span> Piping Loop Legend (ASME A13.1)</span>
+          <div style="display:flex; flex-direction:column; gap:6px; font-size:11px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:12px; height:12px; border-radius:3px; background:#0088ff;"></span>
+              <span>Chilled Water Supply (14°C)</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:12px; height:12px; border-radius:3px; background:#38bdf8;"></span>
+              <span>Chilled Water Return (22°C)</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:12px; height:12px; border-radius:3px; background:#10b981;"></span>
+              <span>Condenser Cold Supply (27°C)</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:12px; height:12px; border-radius:3px; background:#f97316;"></span>
+              <span>Condenser Hot Return (35°C)</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="width:12px; height:12px; border-radius:3px; background:#64748b;"></span>
+              <span>Raw Water Intake / Make-up</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- 3. CENTER 3D VIEWPORT -->
+    <div id="viewport-container">
+      <canvas id="webgl-canvas"></canvas>
+
+      <!-- Viewport Floating Telemetry HUD -->
+      <div class="viewport-overlay camera-presets-hud">
+        <span class="chip-btn" id="hud-tech-badge" style="color:var(--accent-cyan); border-color:var(--accent-cyan);">
+          Water-Based Evaporative
+        </span>
+        <span class="chip-btn" style="color:#fff;">
+          WUE: <strong id="hud-wue-val" style="color:var(--accent-cyan); margin-left:4px;">2.911</strong> L/kWh
+        </span>
+      </div>
+
+      <!-- Quick Tools HUD -->
+      <div class="viewport-overlay quick-tools-hud">
+        <button class="hud-tool-btn" id="hud-btn-cam" title="Toggle Free Orbit" style="color:var(--accent-cyan);">🎥</button>
+      </div>
+
+      <!-- Stage Information Banner inside Viewport -->
+      <div class="viewport-overlay stage-banner-hud" id="stage-banner-hud">
+        <div class="stage-banner-header">
+          <span class="stage-badge" id="stage-title">Stage 1: Water Intake</span>
+          <span style="font-size:11px; color:var(--text-dim);" id="stage-subtitle">Potable / Raw Water Supply</span>
+        </div>
+        <p class="stage-desc" id="stage-description">
+          Raw water enters the data centre from the municipal utility main or treated rainwater skid.
+        </p>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+          <span style="font-size:10px; color:var(--accent-cyan);" id="stage-principle">Engineering: Water Pre-Treatment</span>
+          <span style="font-size:10px; color:var(--accent-emerald);" id="stage-paper">Citation: David Mytton (2021)</span>
+        </div>
+        <div id="stage-metrics-grid" style="display:flex; gap:10px; margin-top:6px; font-size:11px; font-family:var(--font-mono); color:var(--text-main);">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- Guided Faculty Presentation Overlay Card -->
+      <div class="faculty-overlay" id="faculty-tour-overlay">
+        <div class="faculty-header">
+          <span class="faculty-tag">🎓 Faculty Presentation Mode</span>
+          <span class="faculty-step-count" id="tour-step-num">Slide 1 of 10</span>
+          <button class="modal-close-btn" id="btn-tour-exit" title="Exit Tour">✕</button>
+        </div>
+        <div class="faculty-title" id="tour-step-title">1. Introduction: Data Centre Architecture & Water Nexus</div>
+        <span style="font-size:11px; color:var(--text-muted);" id="tour-step-subtitle">The Global Water Footprint of Digital Infrastructure</span>
+        <div class="faculty-body" id="tour-narration">Loading academic walkthrough narration...</div>
+        <div class="formula-display" id="tour-formula" style="margin-top:4px;">
+          <code>Loading formula...</code>
+        </div>
+        <div class="faculty-citation" id="tour-citation">Source: David Mytton (2021) npj Clean Water</div>
+        <div class="faculty-controls">
+          <button class="header-btn" id="btn-tour-prev">◀ Previous Slide</button>
+          <button class="header-btn primary" id="btn-tour-next">Next Slide ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. RIGHT PANEL: MATHEMATICAL CALCULATIONS & CONSERVATION -->
+    <aside class="right-panel">
+      <!-- Tab Controls -->
+      <div class="panel-tabs">
+        <button class="tab-btn active" data-tab="math">Live Math</button>
+        <button class="tab-btn" data-tab="conservation">Conservation</button>
+        <button class="tab-btn" data-tab="specs">Research Specs</button>
+      </div>
+
+      <!-- TAB 1: LIVE MATHEMATICS -->
+      <div class="tab-content active" id="tab-math">
+        
+        <!-- Live Stat Cards -->
+        <div class="stat-card-row">
+          <div class="stat-card">
+            <span class="stat-label">Site WUE (On-Site Water)</span>
+            <div class="stat-val-group">
+              <span class="stat-value" id="metric-wue-site" style="color:var(--accent-cyan);">2.911</span>
+              <span class="stat-unit">L/kWh</span>
+            </div>
+            <span class="stat-subtext" id="badge-wue-rating">Standard Evaporative</span>
+          </div>
+
+          <div class="stat-card">
+            <span class="stat-label">Source WUE (Grid Footprint)</span>
+            <div class="stat-val-group">
+              <span class="stat-value" id="metric-wue-source" style="color:var(--accent-emerald);">5.161</span>
+              <span class="stat-unit">L/kWh</span>
+            </div>
+            <span class="stat-subtext">Direct + Indirect EWIF</span>
+          </div>
+        </div>
+
+        <!-- Part 3A: WUE Formula & Step-by-Step Calculator -->
+        <div class="math-box">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong style="font-size:12px; color:#fff;">💧 WUE Calculator (The Green Grid / ISO 30134)</strong>
+          </div>
+          
+          <div class="formula-display">
+            WUE_site = Annual Water (L) / IT Energy (kWh)
+          </div>
+
+          <div class="input-slider-group">
+            <div class="slider-label-row">
+              <span class="slider-name">Annual Site Water Consumption (Litres):</span>
+            </div>
+            <input type="number" id="input-annual-water" value="25500000" step="500000" min="0" style="background:#0b1322; border:1px solid var(--border-color); color:#fff; padding:6px 10px; border-radius:4px; font-family:var(--font-mono); font-size:12px;">
+            <span style="font-size:10px; color:var(--text-dim);">Baseline: 25.5M L/yr for 1 MW evaporative data centre</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div class="input-slider-group">
+              <div class="slider-label-row">
+                <span class="slider-name">IT Load (kW):</span>
+              </div>
+              <input type="number" id="input-it-load" value="1000" step="100" min="50" style="background:#0b1322; border:1px solid var(--border-color); color:#fff; padding:6px 10px; border-radius:4px; font-family:var(--font-mono); font-size:12px;">
+            </div>
+            <div class="input-slider-group">
+              <div class="slider-label-row">
+                <span class="slider-name">PUE:</span>
+              </div>
+              <input type="number" id="input-pue" value="1.25" step="0.01" min="1.0" max="3.0" style="background:#0b1322; border:1px solid var(--border-color); color:#fff; padding:6px 10px; border-radius:4px; font-family:var(--font-mono); font-size:12px;">
+            </div>
+          </div>
+
+          <!-- Step-by-Step Derivation Box -->
+          <div id="math-wue-derivation" style="background:rgba(0,0,0,0.3); border-radius:4px; padding:8px 10px; font-size:11px; font-family:var(--font-mono); color:var(--text-muted); line-height:1.6;">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Part 3C: Mass Water Balance & Concentration -->
+        <div class="math-box">
+          <strong style="font-size:12px; color:#fff;">⚖️ Cooling Tower Mass Balance & CoC</strong>
+          <div class="formula-display">
+            Make-up (M) = Evaporation (E) + Blowdown (B) + Drift (D)
+            <br>
+            Blowdown (B) = Evaporation / (CoC - 1)
+          </div>
+
+          <div class="input-slider-group">
+            <div class="slider-label-row">
+              <span class="slider-name">Cycles of Concentration (CoC):</span>
+              <span class="slider-value-badge" id="val-coc">4.0x</span>
+            </div>
+            <input type="range" id="slider-coc" min="1.5" max="8.0" step="0.1" value="4.0" style="width:100%; accent-color:var(--accent-cyan); cursor:pointer;">
+            <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-dim);">
+              <span>1.5x (Untreated)</span>
+              <span>4.0x (Standard)</span>
+              <span>8.0x (RO Treated)</span>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px; font-size:11px;">
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">Evaporation (Latent Heat):</span>
+              <strong id="val-evap-loss" style="color:var(--accent-cyan);">19.10M L (75.0%)</strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); height:4px; border-radius:2px; overflow:hidden;">
+              <div id="bar-evap-loss" style="background:var(--accent-cyan); width:75%; height:100%;"></div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:2px;">
+              <span style="color:var(--text-muted);">Blowdown (Mineral Purge):</span>
+              <strong id="val-blowdown-loss" style="color:var(--accent-amber);">6.30M L (24.9%)</strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.08); height:4px; border-radius:2px; overflow:hidden;">
+              <div id="bar-blowdown-loss" style="background:var(--accent-amber); width:25%; height:100%;"></div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:2px;">
+              <span style="color:var(--text-muted);">Drift Mist Loss:</span>
+              <strong id="val-drift-loss" style="color:var(--text-dim);">25.5k L (0.1%)</strong>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:2px;">
+              <span style="color:var(--text-muted);">Closed Pumping Flow:</span>
+              <strong id="val-recirc-rate" style="color:var(--accent-emerald);">450 m³/hr</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Part 3C: Indirect Grid Energy-Water Intensity (EWIF) -->
+        <div class="math-box">
+          <strong style="font-size:12px; color:#fff;">⚡ Grid Water Intensity Factor (EWIF)</strong>
+          <div class="input-slider-group">
+            <span class="slider-name">Regional Power Grid Profile:</span>
+            <select id="select-grid-ewif" style="background:#0b1322; border:1px solid var(--border-color); color:#fff; padding:6px; border-radius:4px; font-size:11px;">
+              <option value="us_average">US National Grid Average (1.80 L/kWh)</option>
+              <option value="india_thermal">India Grid - Coal/Thermal Heavy (2.45 L/kWh)</option>
+              <option value="eu_average">EU Grid Average (1.20 L/kWh)</option>
+              <option value="hydro_heavy">Nordic / Hydro Dominated (0.25 L/kWh)</option>
+              <option value="solar_wind">100% Dedicated Solar / Wind PPA (0.05 L/kWh)</option>
+            </select>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px; font-size:11px;">
+            <span style="color:var(--text-muted);">Indirect Power Station Water:</span>
+            <strong id="metric-indirect-water" style="color:var(--accent-emerald); font-family:var(--font-mono);">19.71M L/yr</strong>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 2: WATER CONSERVATION DEMONSTRATION -->
+      <div class="tab-content" id="tab-conservation">
+        <div class="math-box">
+          <strong style="font-size:12px; color:#fff;">🌱 Conservation Simulator & Savings</strong>
+          
+          <div class="formula-display">
+            Water Saved = Baseline × (Reduction % / 100)
+            <br>
+            New Water Consumption = Baseline - Water Saved
+          </div>
+
+          <div class="input-slider-group">
+            <div class="slider-label-row">
+              <span class="slider-name">Target Water Reduction:</span>
+              <span class="slider-value-badge" id="val-reduction" style="color:var(--accent-emerald); background:var(--accent-emerald-dim);">35%</span>
+            </div>
+            <input type="range" id="slider-water-reduction" min="0" max="95" step="1" value="35" style="width:100%; accent-color:var(--accent-emerald); cursor:pointer;">
+            <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-dim);">
+              <span>0% (Baseline)</span>
+              <span>35% (Chilled Setpoint 18°C)</span>
+              <span>90% (Liquid Immersion)</span>
+            </div>
+          </div>
+
+          <div class="stat-card-row">
+            <div class="stat-card">
+              <span class="stat-label">Water Saved Annually</span>
+              <div class="stat-val-group">
+                <span class="stat-value" id="metric-water-saved" style="color:var(--accent-emerald);">8.93M</span>
+                <span class="stat-unit">Litres</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">New Annual Water</span>
+              <div class="stat-val-group">
+                <span class="stat-value" id="metric-new-consumption" style="color:var(--accent-cyan);">16.57M</span>
+                <span class="stat-unit">Litres</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Equivalencies -->
+          <div style="background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.25); border-radius:6px; padding:10px; margin-top:4px;">
+            <span style="font-size:11px; font-weight:700; color:var(--accent-emerald); text-transform:uppercase;">Ecological Equivalents:</span>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:20px;">🏊</span>
+                <div>
+                  <strong id="metric-pools-saved" style="font-size:13px; color:#fff;">3.57 Pools</strong>
+                  <p style="font-size:9px; color:var(--text-muted);">Olympic Pools (2.5M L)</p>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:20px;">🏡</span>
+                <div>
+                  <strong id="metric-households-saved" style="font-size:13px; color:#fff;">122 People-Yrs</strong>
+                  <p style="font-size:9px; color:var(--text-muted);">Annual Domestic Water</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actionable Strategies -->
+          <div style="display:flex; flex-direction:column; gap:6px; margin-top:6px; font-size:11px;">
+            <div style="padding:6px; background:rgba(255,255,255,0.04); border-radius:4px;">
+              <strong style="color:var(--accent-cyan);">1. Chilled Water Supply Setpoint (7°C → 18°C)</strong>
+              <p style="color:var(--text-muted); font-size:10px; margin-top:2px;">David Mytton (2021): Elevating supply temp cuts chiller energy by 35% and maximizes economizer free cooling.</p>
+            </div>
+            <div style="padding:6px; background:rgba(255,255,255,0.04); border-radius:4px;">
+              <strong style="color:var(--accent-emerald);">2. Cooling Tower CoC Increase (3x → 6x)</strong>
+              <p style="color:var(--text-muted); font-size:10px; margin-top:2px;">Bora Ristic (2015): Advanced RO pre-treatment reduces blowdown purge volume by 50%.</p>
+            </div>
+            <div style="padding:6px; background:rgba(255,255,255,0.04); border-radius:4px;">
+              <strong style="color:var(--accent-amber);">3. Rainwater & CRAH Condensate Capture</strong>
+              <p style="color:var(--text-muted); font-size:10px; margin-top:2px;">ITU-T L.55: Coil condensation yields 4,500 L/day of pure water for make-up.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: RESEARCH SPECIFICATIONS & CITATIONS -->
+      <div class="tab-content" id="tab-specs">
+        <div class="math-box" id="tech-specs-card">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+        <div class="math-box">
+          <strong style="font-size:12px; color:#fff;">📚 Literature Citations</strong>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:11px;">
+            <div class="citation-card">
+              <span class="paper-title">David Mytton (2021)</span>
+              <p style="margin-top:2px;">"Data centre water consumption", <em>npj Clean Water</em> 4:11. Quantifies 25.5M L/yr baseline for 1 MW IT capacity.</p>
+            </div>
+            <div class="citation-card">
+              <span class="paper-title">Bora Ristic et al. (2015)</span>
+              <p style="margin-top:2px;">"The Water Footprint of Data Centers", <em>Sustainability</em> 7. Derives cooling tower mass balance and Phoenix AZ climate trade-offs.</p>
+            </div>
+            <div class="citation-card">
+              <span class="paper-title">ITU-T L.Suppl.55 (2022)</span>
+              <p style="margin-top:2px;">"Water management of data centres for UN SDG 6". Water Circularity Ratio (WCR) and waste heat district heating.</p>
+            </div>
+            <div class="citation-card">
+              <span class="paper-title">Semenov & Oganesyan (2021)</span>
+              <p style="margin-top:2px;">"Impact of Fuel Diversity on Energy Water Intensity", <em>Applied Thermal Eng</em>. Empirical grid EWIF factors.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- 5. BOTTOM PANEL: 7-STAGE TIMELINE STEPPER -->
+    <footer class="bottom-panel">
+      <!-- Playback Controls -->
+      <div class="playback-controls">
+        <button id="btn-sim-prev" class="ctrl-btn" title="Previous Stage">⏮</button>
+        <button id="btn-sim-play-pause" class="ctrl-btn play-btn" title="Play/Pause Simulation">▶</button>
+        <button id="btn-sim-next" class="ctrl-btn" title="Next Stage">⏭</button>
+        <button id="btn-sim-reset" class="ctrl-btn" title="Reset Simulation">🔄</button>
+      </div>
+
+      <!-- Stages Stepper Progress Bar (Stages 1 to 7) -->
+      <div class="stages-stepper">
+        <div class="stage-step-item active" data-stage-index="0">
+          <div class="stage-step-bar"></div>
+          <span class="stage-step-label">1. Intake</span>
+        </div>
+        <div class="stage-step-item" data-stage-index="1">
+          <div class="stage-step-bar"></div>
+          <span class="stage-step-label">2. Storage</span>
+        </div>
+        <div class="stage-step-item" data-stage-index="2">
+          <div class="stage-step-bar"></div>
+          <span class="stage-step-label">3. Pumping</span>
+        </div>
+        <div class="stage-step-item" data-stage-index="3">
+          <div class="stage-step-bar"></div>
+          <span class="stage-step-label">4. Heat Exchange</span>
+        </div>
+        <div class="stage-step-item" data-stage-index="4">
+          <div class="stage-step-bar"></div>
+          <span class="stage-step-label">5. Heat Rejection</span>
+        </div>
+        <div class="stage-step-item" data-stage-index="5">
+          <div class="stage-step-bar"></div>
+          <span class="stage-step-label">6. Return & Reuse</span>
+        </div>
+        <div class="stage-step-item" data-stage-index="6">
+          <div class="stage-step-bar"></div>
+          <span class="stage-step-label">7. Water Loss</span>
+        </div>
+      </div>
+
+      <!-- Simulation Live Telemetry Indicator -->
+      <div class="sim-status-group">
+        <label style="display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-muted); cursor:pointer;">
+          <input type="checkbox" id="chk-auto-advance"> Auto-Advance
+        </label>
+        <div class="status-telemetry">
+          <span class="status-telemetry-title">Simulation State</span>
+          <span class="status-telemetry-val">
+            <span class="pulsing-dot"></span> Active 60 FPS
+          </span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ==================== COMPONENT INSPECTION MODAL ==================== -->
+  <div class="modal-backdrop" id="component-modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-category" id="modal-component-category">Mechanical Infrastructure</span>
+          <h3 class="modal-title" id="modal-component-title">Component Specification</h3>
+        </div>
+        <button class="modal-close-btn" id="btn-modal-close" title="Close Modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-section">
+          <span class="detail-heading">Working Principle</span>
+          <p class="detail-text" id="modal-component-principle">Loading...</p>
+        </div>
+        <div class="detail-section">
+          <span class="detail-heading">Purpose in Data Centre</span>
+          <p class="detail-text" id="modal-component-purpose">Loading...</p>
+        </div>
+        <div class="detail-section">
+          <span class="detail-heading">Water Consumption & Conservation Relevance</span>
+          <p class="detail-text" id="modal-component-water" style="color:var(--accent-cyan);">Loading...</p>
+        </div>
+        <div class="citation-card" id="modal-component-citation">
+          Literature Citation
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main ES Module Application Script -->
+  <script type="module" src="src/main.js"></script>
+
+</body>
+</html>

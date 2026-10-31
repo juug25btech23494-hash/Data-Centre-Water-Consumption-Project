@@ -1,0 +1,28 @@
+{
+  "name": "datacenter-water-cooling-simulation",
+  "version": "1.0.0",
+  "description": "3D Interactive Data Centre Water Consumption, Cooling and Conservation Simulation",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "threejs",
+    "datacenter",
+    "water-consumption",
+    "cooling-simulation",
+    "wue-calculator",
+    "liquid-cooling",
+    "evaporative-cooling"
+  ],
+  "author": "Antigravity Engineering Specialist",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "three": "^0.160.0"
+  }
+}
